@@ -1,0 +1,63 @@
+
+
+Ethernaut Challenge Recovery Level 17
+
+PROBLEM: The "Recovery" Contract creates the "SimpleToken" Contract using the "generateToken" function. From the Debug console of the browser,
+you have the address of the "Recovery" Contract but not the address of ""SimpleToken" Contract. It is as if the address of SimpleToken is lost.
+
+The SimpleToken contract was paid 0.5 token as part of the last transaction from Recovery Contract.
+
+OBJECTIVE: get the 0.5 token be paid back to your Account(Wallet) address from the the SimpleToken contract. 
+
+APPRAOCH: 
+- Find the address of the SimpleToken contract
+- use that address to create a SimpleToken instance and 
+- call the selfDestruct function on that SimpleToken instance 
+
+FIND THE ADDRESS OF SIMPLETOKEN CONTRACT:
+1) you can deterministically compute the address by using your account (Wallet) address that created this Contract 
+   or you can look it up in ROPSTEN Etherscan by looking up all the transactions using the Recovery 
+2) With the address, you can selfdestruct the simpleToken Contract that you created and have the payout to your Wallet address.
+
+STEPS:
+1. Make sure your MetaMask is pointing to Ropsten and "console" option selected in debug (Inspect option in Browser)
+2. Get new instance of the Recovefry problem
+3. Find the Instance address ( This is the address of Recovefy Token)
+4. Open "https://ropsten.etherscan.io/"
+5. Type the instance address and hit search
+6. Click on the transaction Hash of in the "Contact Creator" of "More Info" box
+7. Notice the 0.5 Ether in the "To" in Overview tab.
+8. Click on last "To-->" address --- this is the address of the SimpleToken Contract. Go to STEP 8B for an alternative way to get the SIMPLETOKEN Contract address
+9. Go to Remix. Copy the SimpleToken contract code. Also copy the following code:
+   contract RecoverToken{
+    address payable receiver = msg.sender;
+    SimpleToken simpleToken;
+    
+    function destroySimpleToken(address payable simpleTokenAddress) public{
+        simpleToken = SimpleToken(simpleTokenAddress);
+        simpleToken.destroy(receiver);
+    } 
+   }
+
+10. Make sure correct compiler version 6.6 selected. Compile the code
+11. Selected Deploy Ethereum icon from left in REMIX. 
+    Make sure "Injected Web3" selected in Environment in Remix. I lost a lot of time because I had deafult onm"Javscript VM" was selected.
+12. Deploy the RecoverToken - make sure this is selected in the CONTRACT drop down in the left side of REMIX
+13. Check your wallet balance
+14. Invoke destroySimpleToken. Provide the SimpleToken address copied in STEP 8.
+15. That should transfer 0.5 token to your Account (Wallet).
+16. Now you can "Submit instance" for the Challenge.
+
+8B.
+NOTE: There is another way to get the contract address. This command works only on the 0.5 version of the ethernaut challenge.
+Calculate the contact address:(From yellow paper)
+The address for an Ethereum contract is deterministically computed from the address of its creator (sender) and how many transactions the creator has sent (nonce). 
+The sender and nonce are RLP encoded and then hashed with Keccak-256 and then the right most 160 bits of the Keccak hash is taken.
+
+address = rightmost_20_bytes(keccak(RLP(sender address, nonce))
+
+web3.utils.soliditySha3("0xd6", "0x94", <instance address>, "0x01")
+Take the last 40 characters of the hash. That will be the address of SIMPLETOKEN contract.
+
+
+
